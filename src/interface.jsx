@@ -8,11 +8,16 @@ export default function MarcaForm() {
     numProtocolo: '',
   });
 
+  const [campoSelecionado, setCampoSelecionado] = useState('');
   const [respostaApi, setRespostaApi] = useState(''); // Estado para mostrar resposta da API
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { value } = e.target;
+    setFormData((prev) => ({ ...prev, [campoSelecionado]: value }));
+  };
+
+  const handleCampoChange = (e) => {
+    setCampoSelecionado(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -44,42 +49,68 @@ export default function MarcaForm() {
       <h3 style={styles.subtitulo}>Escreva Aqui os Dados de Sua Empresa</h3>
 
       <form onSubmit={handleSubmit} style={styles.form}>
-        <label style={styles.label}>Nome Da Empresa:</label>
+        <label style={styles.label}>Entrada:</label>
         <input
           type="text"
-          name="empresa"
-          value={formData.empresa}
+          name= {campoSelecionado}
+          value={formData.campoSelecionado}
           onChange={handleChange}
           style={styles.input}
           required
         /><br /><br />
 
-        <label style={styles.label}>Nome Pessoa:</label>
-        <input
-          type="text"
-          name="nome"
-          value={formData.nome}
-          onChange={handleChange}
-          style={styles.input}
-        /><br /><br />
+        <div style={{ marginBottom: '15px' }}>
+          <label style={styles.label}>
+            <input
+              type="radio"
+              name="campo"
+              value="empresa"
+              checked={campoSelecionado === 'empresa'}
+              onChange={handleCampoChange}
+              style={{ marginRight: '8px' }}
+            />
+            Nome da Empresa
+          </label><br />
+          
+          <label style={styles.label}>
+            <input
+              type="radio"
+              name="campo"
+              value="nome"
+              checked={campoSelecionado === 'nome'}
+              onChange={handleCampoChange}
+              style={{ marginRight: '8px' }}
+            />
+            Nome
+          </label><br />
+          
+          <label style={styles.label}>
+            <input
+              type="radio"
+              name="campo"
+              value="nomeMarca"
+              checked={campoSelecionado === 'nomeMarca'}
+              onChange={handleCampoChange}
+              style={{ marginRight: '8px' }}
+            />
+            Nome da Marca
+          </label><br />
+          
+          <label style={styles.label}>
+            <input
+              type="radio"
+              name="campo"
+              value="numProtocolo"
+              checked={campoSelecionado === 'numProtocolo'}
+              onChange={handleCampoChange}
+              style={{ marginRight: '8px' }}
+            />
+            Número do Protocolo
+          </label>
+        </div>
+      
 
-        <label style={styles.label}>Nome da Marca:</label>
-        <input
-          type="text"
-          name="nomeMarca"
-          value={formData.nomeMarca}
-          onChange={handleChange}
-          style={styles.input}
-        /><br /><br />
-
-        <label style={styles.label}>Numero do Protocolo:</label>
-        <input
-          type="number"
-          name="numProtocolo"
-          value={formData.numProtocolo}
-          onChange={handleChange}
-          style={styles.input}
-        /><br /><br />
+        
 
         <button type="submit" style={styles.button}>Enviar</button>
       </form>
