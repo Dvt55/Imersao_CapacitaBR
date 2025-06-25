@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 
 export default function MarcaForm() {
   const [formData, setFormData] = useState({
@@ -10,6 +10,7 @@ export default function MarcaForm() {
 
   const [campoSelecionado, setCampoSelecionado] = useState('');
   const [respostaApi, setRespostaApi] = useState(''); // Estado para mostrar resposta da API
+
 
   const handleChange = (e) => {
     const { value } = e.target;
@@ -25,18 +26,19 @@ export default function MarcaForm() {
     console.log('Dados enviados:', formData);
 
     try {
-      const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+    const filtrosValidos = Object.fromEntries(
+      Object.entries(formData).filter(([_, v]) => v !== '')
+    );
 
-      const data = await response.json();
-      console.log('Resposta da API:', data);
-      setRespostaApi(JSON.stringify(data, null, 2)); // Atualiza a saída
-      alert("Enviado com sucesso!");
+    const queryParams = new URLSearchParams(filtrosValidos).toString();
+    const url = `http://localhost:5000/busca?${queryParams}`;
+
+    const response = await fetch(url);
+
+    const data = await response.json();
+    console.log('Resposta da API:', data);
+    setRespostaApi(JSON.stringify(data, null, 2)); // Atualiza a saída
+    alert("Enviado com sucesso!");
     } catch (error) {
       console.error('Erro ao enviar para API:', error);
       setRespostaApi('Erro ao enviar para API.');
@@ -53,7 +55,7 @@ export default function MarcaForm() {
         <input
           type="text"
           name= {campoSelecionado}
-          value={formData.campoSelecionado}
+          value={formData[campoSelecionado] || ''}
           onChange={handleChange}
           style={styles.input}
           required
@@ -115,9 +117,50 @@ export default function MarcaForm() {
         <button type="submit" style={styles.button}>Enviar</button>
       </form>
 
-      <div style={styles.output}>
-        <pre>{respostaApi}</pre>
-      </div>
+      {respostaApi && (
+  <div style={styles.outputBox}>
+    <h4 style={styles.outputTitle}>Resultado:</h4>
+    {respostaApi.startsWith('{') || respostaApi.startsWith('[') ? (
+      (() => {
+        try {
+          const parsed = JSON.parse(respostaApi);
+          if (Array.isArray(parsed)) {
+            return parsed.map((item, idx) => (
+              <div key={idx} style={styles.jsonContainer}>
+                {Object.entries(item).map(([key, value], subIdx) => (
+                  <div key={subIdx} style={styles.jsonItem}>
+                    <span style={styles.jsonKey}>{key}:</span>
+                    <span style={styles.jsonValue}>
+                      {typeof value === 'object'
+                        ? JSON.stringify(value, null, 2)
+                        : value.toString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ));
+          } else {
+            return Object.entries(parsed).map(([key, value], index) => (
+              <div key={index} style={styles.jsonItem}>
+                <span style={styles.jsonKey}>{key}:</span>
+                <span style={styles.jsonValue}>
+                  {typeof value === 'object'
+                    ? JSON.stringify(value, null, 2)
+                    : value.toString()}
+                </span>
+              </div>
+            ));
+          }
+        } catch (error) {
+          return <pre style={{ color: 'red' }}>Erro ao interpretar JSON.</pre>;
+        }
+      })()
+    ) : (
+      <pre style={{ color: '#CBA135' }}>{respostaApi}</pre>
+    )}
+  </div>
+)}
+
     </div>
   );
 }
@@ -182,5 +225,59 @@ const styles = {
     whiteSpace: 'pre-wrap', /* Para preservar espaços e quebras de linha */
     boxSizing: 'border-box',
     color: '#000', // Para texto legível no fundo claro
-  }
+  },
+
+  outputBox: {
+  marginTop: '30px',
+  backgroundColor: '#111', // fundo escuro
+  borderRadius: '8px',
+  padding: '20px',
+  width: '100%',
+  maxWidth: '500px',
+  color: '#CBA135',
+  boxShadow: '0 0 10px #CBA135',
+},
+
+outputTitle: {
+  marginBottom: '15px',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  borderBottom: '1px solid #CBA135',
+  paddingBottom: '5px',
+  color: '#CBA135',
+},
+
+jsonContainer: {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  backgroundColor: '#1a1a1a',
+  padding: '10px',
+  borderRadius: '5px',
+},
+
+jsonItem: {
+  display: 'flex',
+  justifyContent: 'space-between',
+  borderBottom: '1px solid #333',
+  paddingBottom: '6px',
+  marginBottom: '6px',
+  wordBreak: 'break-word',
+},
+
+jsonKey: {
+  fontWeight: 'bold',
+  color: '#CBA135',
+  marginRight: '10px',
+},
+
+jsonValue: {
+  color: '#eee',
+  flex: 1,
+  textAlign: 'right',
+},
+
+
 };
+
+
