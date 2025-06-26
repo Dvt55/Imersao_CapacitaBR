@@ -33,6 +33,7 @@ export default function MarcaForm() {
     const queryParams = new URLSearchParams(filtrosValidos).toString();
     const url = `http://localhost:5000/busca?${queryParams}`;
 
+
     const response = await fetch(url);
 
     const data = await response.json();
